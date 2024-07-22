@@ -1,0 +1,51 @@
+import pandas as pd
+from pymatgen.ext.matproj import MPRester
+
+if __name__ == "__main__":
+    API_KEY = "cQIJkUSzqOMCy2iV"
+    with MPRester(API_KEY) as mpr:
+        criteria = {
+            'elements': {"$all": ["Na", "Ti", "O"]},
+            'nelements': 3,
+            'e_above_hull': {'$gte': 0.0, '$lt': 0.055},
+            'band_gap': {'$gte': 1.0, '$lt': 3.0}
+        }
+
+        props = ['material_id', 'pretty_formula', 'band_gap', 'spacegroup.symbol', 'formation_energy_per_atom', 'e_above_hull', 'density']
+
+        result = mpr.query(criteria=criteria, properties=props)
+
+        # Convert result to DataFrame
+        df = pd.DataFrame(result)
+
+        # Specify Excel file path
+        excel_file = 'materials_data.xlsx'
+
+        # Save DataFrame to Excel
+        df.to_excel(excel_file, index=False, engine='openpyxl')
+
+        print(f"Number of entries found: {len(result)}")
+        print(f"Data saved to {excel_file}"
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+from pymatgen.ext.matproj import MPRester
+
+if __name__ == "__main__":
+    API_KEY = "cQIJkUSzqOMCy2iV"
+    with MPRester(API_KEY) as mpr:
+        criteria = {
+            'elements': {"$all": ["Na", "Ti", "O"]},
+            'nelements': 3,
+            'e_above_hull': {'$lte': 0.1},
+            'band_gap': {'$gt': 1.0, '$lt': 3.0}
+        }
+
+        props = ['material_id', 'pretty_formula', 'band_gap', 'spacegroup.symbol', 'formation_energy_per_atom', 'e_above_hull', 'density']
+
+        result = mpr.query(criteria=criteria, properties=props)
+
+        print(f"Number of entries found: {len(result)}")
+
+        for e in result:
+            print(e['material_id'], e['pretty_formula'], e['spacegroup.symbol'], e['band_gap'], e['formation_energy_per_atom'], e['e_above_hull'], e['density'])
