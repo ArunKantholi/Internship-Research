@@ -1,0 +1,45 @@
+from pymatgen.ext.matproj import MPRester
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+import openpyxl
+
+def get_crystal_system(structure):
+
+    sga = SpacegroupAnalyzer(structure)
+
+    return sga.get_crystal_system()
+
+if __name__ == "__main__":
+    API_KEY = "cQIJkUSzqOMCy2iV"
+
+    with MPRester(API_KEY) as mpr:
+
+        criteria = {
+            'elements': {"$all": ["Na", "Ti", "O"]},
+            'nelements': 3
+        }
+
+        all_compounds = mpr.query(criteria, ["material_id", "pretty_formula", "e_above_hull", "band_gap", "structure"])
+
+        print('All compounds in the Na-Ti-O system are:', [comp['material_id'] for comp in all_compounds])
+
+        # Prepare data for Excel
+        data = []
+        for entry in all_compounds:
+            material_id = entry['material_id']
+            formula = entry['pretty_formula']
+            energy_above_hull = entry.get('e_above_hull', 'N/A')
+            band_gap = entry.get('band_gap', 'N/A')
+
+            structure = entry['structure']
+            crystal_system = get_crystal_system(structure)
+
+            data.append([material_id, formula, energy_above_hull, band_gap, crystal_system])
+
+        # Save data to Excel file
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["Material ID", "Formula", "Energy Above Hull", "Band Gap", "Crystal System"])
+        for row in data:
+            ws.append(row)
+
+        wb.save("Na_Ti_O_compounds.xlsx")
